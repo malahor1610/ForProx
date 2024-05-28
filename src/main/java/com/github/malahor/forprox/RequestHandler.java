@@ -23,7 +23,8 @@ public class RequestHandler {
       establishConnection(connection, communication);
       connection.forwardRequest(communication);
       connection.forwardResponse(communication);
-      log.info("Closing connection");
+      log.info(
+          "Closing connection of {}:{}", InetAddress.getLoopbackAddress(), clientSocket.getPort());
     } catch (IOException e) {
       log.error("Error occurred: {}", e.getMessage());
     }
@@ -45,7 +46,8 @@ public class RequestHandler {
     return communication.clientReader().readLine();
   }
 
-  private void establishConnection(Connection connection, Communication communication) throws IOException {
+  private void establishConnection(Connection connection, Communication communication)
+      throws IOException {
     var target = connection.establish();
     communication.setupTarget(target);
     if (connection instanceof HttpsConnection https) https.confirmConnection(communication);

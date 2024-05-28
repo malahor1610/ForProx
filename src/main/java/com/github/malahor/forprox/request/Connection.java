@@ -9,7 +9,9 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @AllArgsConstructor
 public abstract class Connection {
 
@@ -40,7 +42,7 @@ public abstract class Connection {
         out.flush();
       }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      log.error("Error occurred: {}", e.getMessage());
     }
   }
 
@@ -48,7 +50,7 @@ public abstract class Connection {
     return host;
   }
 
-  public InetAddress address() throws UnknownHostException, MalformedURLException {
+  public InetAddress address() throws UnknownHostException {
     return InetAddress.getByName(host());
   }
 
