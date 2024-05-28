@@ -2,6 +2,8 @@ package com.github.malahor.forprox.request;
 
 import com.github.malahor.forprox.Communication;
 
+import java.io.IOException;
+
 public class HttpsConnection extends Connection {
 
   public HttpsConnection(String host) {
@@ -28,4 +30,11 @@ public class HttpsConnection extends Connection {
     new Thread(() -> forwardData(communication.getClientIn(), communication.getTargetOut()))
         .start();
   }
+
+  public void confirmConnection(Communication communication) throws IOException {
+    var out = communication.getClientOut();
+    out.write("HTTP/1.1 200 Connection Established\r\n\r\n".getBytes());
+    out.flush();
+  }
+
 }
