@@ -3,6 +3,7 @@ package com.github.malahor.forprox;
 import com.github.malahor.forprox.request.Connection;
 import com.github.malahor.forprox.request.HttpsConnection;
 import java.io.*;
+import java.net.InetAddress;
 import java.net.Socket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,12 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RequestHandler {
 
-  private final byte[] buffer = new byte[4096];
   private final Socket clientSocket;
 
   public void run() {
-    try (var communication = new CommunicationManager()) {
+    try (var communication = new Communication()) {
       communication.setupClient(clientSocket);
+      log.info("Client: {}:{}", InetAddress.getLoopbackAddress(), clientSocket.getPort());
       var request = readRequest(communication);
       log.info("Incoming request: {}", request);
       var connection = Connection.initialize(request);
@@ -32,29 +33,14 @@ public class RequestHandler {
       }
       log.info("Connection established with: {}:{}", connection.address(), connection.port());
       connection.forwardRequest(communication);
-      log.info("Forwarding response");
-      writeResponse(communication);
-      log.info("Finished request handling");
+      connection.forwardResponse(communication);
+      log.info("Closing connection");
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  private String readRequest(CommunicationManager communication) throws IOException {
+  private String readRequest(Communication communication) throws IOException {
     return communication.clientReader().readLine();
-  }
-
-  public void writeResponse(CommunicationManager communicationManager) throws IOException {
-    var response = communicationManager.getTargetIn();
-    var out = communicationManager.getClientOut();
-    try {
-      int bytesRead;
-      while ((bytesRead = response.read(buffer)) != -1) {
-        out.write(buffer, 0, bytesRead);
-        out.flush();
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 }

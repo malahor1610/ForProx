@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import lombok.Getter;
 
-public class CommunicationManager implements AutoCloseable {
+public class Communication implements AutoCloseable {
 
   private Socket clientSocket;
   @Getter private InputStream clientIn;
@@ -32,6 +32,10 @@ public class CommunicationManager implements AutoCloseable {
     clientReader.reset();
     clientReader.mark(100);
     return clientReader;
+  }
+
+  public PrintWriter targetWriter() {
+    return new PrintWriter(targetOut);
   }
 
   @Override
