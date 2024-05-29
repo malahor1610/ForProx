@@ -19,7 +19,6 @@ public class Server {
       }
     } catch (IOException e) {
       log.error("Error occurred: {}", e.getMessage());
-      e.printStackTrace();
     }
   }
 }

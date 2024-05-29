@@ -1,7 +1,6 @@
 package com.github.malahor.forprox.connection;
 
 import com.github.malahor.forprox.Communication;
-
 import java.io.IOException;
 
 public class HttpsConnection extends Connection {
@@ -35,5 +34,4 @@ public class HttpsConnection extends Connection {
     out.write("HTTP/1.1 200 Connection Established\r\n\r\n".getBytes());
     out.flush();
   }
-
 }

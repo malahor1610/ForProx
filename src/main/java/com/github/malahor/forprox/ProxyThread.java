@@ -2,12 +2,11 @@ package com.github.malahor.forprox;
 
 import com.github.malahor.forprox.connection.Connection;
 import com.github.malahor.forprox.connection.HttpsConnection;
+import com.github.malahor.forprox.validation.ForbiddenException;
+import com.github.malahor.forprox.validation.HostValidator;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
-
-import com.github.malahor.forprox.validation.ForbiddenException;
-import com.github.malahor.forprox.validation.HostValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,9 +52,10 @@ public class ProxyThread extends Thread {
     log.info("Connection established with: {}:{}", connection.address(), connection.port());
   }
 
-  private void manageDataTransfer(Connection connection, Communication communication) throws InterruptedException {
-    var requestThread = new Thread(()-> connection.forwardRequest(communication));
-    var responseThread = new Thread(()-> connection.forwardResponse(communication));
+  private void manageDataTransfer(Connection connection, Communication communication)
+      throws InterruptedException {
+    var requestThread = new Thread(() -> connection.forwardRequest(communication));
+    var responseThread = new Thread(() -> connection.forwardResponse(communication));
     requestThread.start();
     responseThread.start();
     requestThread.join();

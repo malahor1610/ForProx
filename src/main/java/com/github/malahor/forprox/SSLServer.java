@@ -26,7 +26,6 @@ public class SSLServer {
         }
       } catch (IOException e) {
         log.error("Error occurred: {}", e.getMessage());
-        e.printStackTrace();
       }
     } catch (KeyStoreException
         | IOException
@@ -35,7 +34,6 @@ public class SSLServer {
         | UnrecoverableKeyException
         | KeyManagementException e) {
       log.error("Error occurred: {}", e.getMessage());
-      e.printStackTrace();
     }
   }
 

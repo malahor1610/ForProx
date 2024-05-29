@@ -1,11 +1,10 @@
 package com.github.malahor.forprox.validation;
 
+import com.github.malahor.forprox.Communication;
+import com.github.malahor.forprox.connection.Connection;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.stream.Stream;
-
-import com.github.malahor.forprox.Communication;
-import com.github.malahor.forprox.connection.Connection;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ResourceUtils;
 
@@ -15,7 +14,7 @@ public class HostValidator {
   private static final String BANNED_HOSTS_LIST = "classpath:banned.txt";
 
   public static void validateHost(Connection connection, Communication communication)
-          throws ForbiddenException, IOException {
+      throws ForbiddenException, IOException {
     var host = connection.host();
     log.info("Resolved host: {}", host);
     if (HostValidator.isBanned(host)) {
