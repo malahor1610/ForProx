@@ -2,6 +2,7 @@ package com.github.malahor.forprox;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.github.malahor.forprox.server.Server;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;

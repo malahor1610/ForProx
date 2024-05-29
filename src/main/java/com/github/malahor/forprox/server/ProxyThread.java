@@ -1,4 +1,4 @@
-package com.github.malahor.forprox;
+package com.github.malahor.forprox.server;
 
 import com.github.malahor.forprox.connection.Connection;
 import com.github.malahor.forprox.connection.HttpsConnection;

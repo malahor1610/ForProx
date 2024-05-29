@@ -1,6 +1,6 @@
 package com.github.malahor.forprox.connection;
 
-import com.github.malahor.forprox.Communication;
+import com.github.malahor.forprox.server.Communication;
 import java.net.MalformedURLException;
 import java.net.URL;
 import lombok.SneakyThrows;

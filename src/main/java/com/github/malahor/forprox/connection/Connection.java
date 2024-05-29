@@ -1,6 +1,6 @@
 package com.github.malahor.forprox.connection;
 
-import com.github.malahor.forprox.Communication;
+import com.github.malahor.forprox.server.Communication;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

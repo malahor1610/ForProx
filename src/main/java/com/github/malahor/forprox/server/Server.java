@@ -1,4 +1,4 @@
-package com.github.malahor.forprox;
+package com.github.malahor.forprox.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;

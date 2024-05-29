@@ -1,5 +1,7 @@
 package com.github.malahor.forprox;
 
+import com.github.malahor.forprox.server.SSLServer;
+import com.github.malahor.forprox.server.Server;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;

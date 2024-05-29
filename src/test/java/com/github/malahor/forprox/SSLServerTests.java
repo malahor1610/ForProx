@@ -2,6 +2,7 @@ package com.github.malahor.forprox;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.github.malahor.forprox.server.SSLServer;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;

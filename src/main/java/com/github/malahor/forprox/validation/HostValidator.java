@@ -1,6 +1,6 @@
 package com.github.malahor.forprox.validation;
 
-import com.github.malahor.forprox.Communication;
+import com.github.malahor.forprox.server.Communication;
 import com.github.malahor.forprox.connection.Connection;
 import java.io.IOException;
 import java.nio.file.Files;
