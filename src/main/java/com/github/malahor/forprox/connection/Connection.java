@@ -26,7 +26,7 @@ public abstract class Connection {
 
   public abstract int port();
 
-  public abstract void forwardRequest(Communication communication) throws IOException;
+  public abstract void forwardRequest(Communication communication);
 
   public void forwardResponse(Communication communication) {
     forwardData(communication.getTargetIn(), communication.getClientOut());

@@ -1,6 +1,8 @@
 package com.github.malahor.forprox.connection;
 
 import com.github.malahor.forprox.Communication;
+import lombok.SneakyThrows;
+
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,7 +29,8 @@ public class HttpConnection extends Connection {
   }
 
   @Override
-  public void forwardRequest(Communication communication) throws IOException {
+  @SneakyThrows
+  public void forwardRequest(Communication communication) {
     var clientReader = communication.clientReader();
     var serverWriter = communication.targetWriter();
     String line;

@@ -14,7 +14,7 @@ public class HostValidator {
 
   private static final String BANNED_HOSTS_LIST = "classpath:banned.txt";
 
-  public static void validateHost(Communication communication, Connection connection)
+  public static void validateHost(Connection connection, Communication communication)
           throws ForbiddenException, IOException {
     var host = connection.host();
     log.info("Resolved host: {}", host);

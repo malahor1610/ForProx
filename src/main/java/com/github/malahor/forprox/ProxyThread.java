@@ -23,13 +23,12 @@ public class ProxyThread extends Thread {
       log.info("Client: {}:{}", InetAddress.getLoopbackAddress(), clientSocket.getPort());
       communication.setupClient(clientSocket);
       var connection = initializeConnection(communication);
-      HostValidator.validateHost(communication, connection);
+      HostValidator.validateHost(connection, communication);
       establishConnection(connection, communication);
-      connection.forwardRequest(communication);
-      connection.forwardResponse(communication);
+      manageDataTransfer(connection, communication);
       log.info(
           "Closing connection of {}:{}", InetAddress.getLoopbackAddress(), clientSocket.getPort());
-    } catch (IOException e) {
+    } catch (IOException | InterruptedException e) {
       log.error("Error occurred: {}", e.getMessage());
     } catch (ForbiddenException e) {
       log.info("Host is forbidden {}", e.getMessage());
@@ -52,5 +51,14 @@ public class ProxyThread extends Thread {
     communication.setupTarget(target);
     if (connection instanceof HttpsConnection https) https.confirmConnection(communication);
     log.info("Connection established with: {}:{}", connection.address(), connection.port());
+  }
+
+  private void manageDataTransfer(Connection connection, Communication communication) throws InterruptedException {
+    var requestThread = new Thread(()-> connection.forwardRequest(communication));
+    var responseThread = new Thread(()-> connection.forwardResponse(communication));
+    requestThread.start();
+    responseThread.start();
+    requestThread.join();
+    responseThread.join();
   }
 }

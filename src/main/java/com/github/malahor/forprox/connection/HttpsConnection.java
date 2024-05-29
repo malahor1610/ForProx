@@ -27,8 +27,7 @@ public class HttpsConnection extends Connection {
 
   @Override
   public void forwardRequest(Communication communication) {
-    new Thread(() -> forwardData(communication.getClientIn(), communication.getTargetOut()))
-        .start();
+    forwardData(communication.getClientIn(), communication.getTargetOut());
   }
 
   public void confirmConnection(Communication communication) throws IOException {
