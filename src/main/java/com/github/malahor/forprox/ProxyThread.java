@@ -10,16 +10,17 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-public class RequestHandler {
+public class ProxyThread extends Thread {
 
   private final Socket clientSocket;
 
+  @Override
   public void run() {
     try (var communication = new Communication()) {
       log.info("Client: {}:{}", InetAddress.getLoopbackAddress(), clientSocket.getPort());
       communication.setupClient(clientSocket);
       var connection = initializeConnection(communication);
-      validateHost(connection);
+      HostValidator.validateHost(communication, connection);
       establishConnection(connection, communication);
       connection.forwardRequest(communication);
       connection.forwardResponse(communication);
@@ -27,13 +28,9 @@ public class RequestHandler {
           "Closing connection of {}:{}", InetAddress.getLoopbackAddress(), clientSocket.getPort());
     } catch (IOException e) {
       log.error("Error occurred: {}", e.getMessage());
+    } catch (ForbiddenException e) {
+      log.info("Host is forbidden {}", e.getMessage());
     }
-  }
-
-  private void validateHost(Connection connection) {
-    var host = connection.host();
-    log.info("Resolved host: {}", host);
-    // TODO: check host in scope of banned/warned/whatever sites
   }
 
   private Connection initializeConnection(Communication communication) throws IOException {

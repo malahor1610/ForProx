@@ -18,7 +18,7 @@ public class Server {
       log.info("Proxy server started at port: {}", PORT);
       while (true) {
         var clientSocket = serverSocket.accept();
-        new Thread(() -> new RequestHandler(clientSocket).run()).start();
+        new ProxyThread(clientSocket).start();
       }
     } catch (IOException e) {
       log.error("Error occurred: {}", e.getMessage());
