@@ -1,11 +1,10 @@
-package com.github.malahor.forprox.request;
+package com.github.malahor.forprox.connection;
 
 import com.github.malahor.forprox.Communication;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import lombok.AllArgsConstructor;

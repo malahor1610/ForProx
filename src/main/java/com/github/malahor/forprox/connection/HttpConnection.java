@@ -1,4 +1,4 @@
-package com.github.malahor.forprox.request;
+package com.github.malahor.forprox.connection;
 
 import com.github.malahor.forprox.Communication;
 import java.io.*;

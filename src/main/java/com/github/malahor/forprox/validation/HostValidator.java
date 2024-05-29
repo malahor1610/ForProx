@@ -1,10 +1,11 @@
-package com.github.malahor.forprox;
+package com.github.malahor.forprox.validation;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.stream.Stream;
 
-import com.github.malahor.forprox.request.Connection;
+import com.github.malahor.forprox.Communication;
+import com.github.malahor.forprox.connection.Connection;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ResourceUtils;
 

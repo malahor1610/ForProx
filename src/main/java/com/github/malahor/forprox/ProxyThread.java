@@ -1,10 +1,13 @@
 package com.github.malahor.forprox;
 
-import com.github.malahor.forprox.request.Connection;
-import com.github.malahor.forprox.request.HttpsConnection;
+import com.github.malahor.forprox.connection.Connection;
+import com.github.malahor.forprox.connection.HttpsConnection;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
+
+import com.github.malahor.forprox.validation.ForbiddenException;
+import com.github.malahor.forprox.validation.HostValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
