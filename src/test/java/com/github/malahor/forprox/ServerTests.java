@@ -12,7 +12,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class ForProxApplicationTests {
+class ServerTests {
 
   private static final int proxyPort = 8989;
   private static final Server server = new Server();
@@ -40,10 +40,10 @@ class ForProxApplicationTests {
       var responseBody = EntityUtils.toString(response.getEntity());
       assertEquals(
           """
-                {
-                  "origin": "109.243.1.65"
-                }
-                """,
+                  {
+                    "origin": "109.243.1.65"
+                  }
+                  """,
           responseBody);
     }
   }
@@ -74,5 +74,4 @@ class ForProxApplicationTests {
       assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatusLine().getStatusCode());
     }
   }
-
 }
