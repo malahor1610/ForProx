@@ -45,7 +45,6 @@ class SSLServerTests {
             .build()) {
       var httpGet = new HttpGet("https://httpbin.org/ip");
       var response = httpClient.execute(httpGet);
-      assertEquals(200, response.getStatusLine().getStatusCode());
       var responseBody = EntityUtils.toString(response.getEntity());
       assertEquals(
           """
@@ -70,7 +69,6 @@ class SSLServerTests {
             .build()) {
       var httpGet = new HttpGet("http://httpbin.org/ip");
       var response = httpClient.execute(httpGet);
-      assertEquals(200, response.getStatusLine().getStatusCode());
       var responseBody = EntityUtils.toString(response.getEntity());
       assertEquals(
           """

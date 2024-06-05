@@ -1,6 +1,7 @@
 package com.github.malahor.forprox.server;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.Socket;
 import lombok.Getter;
 
@@ -16,6 +17,7 @@ public class Communication implements AutoCloseable {
 
   public void setupClient(Socket socket) throws IOException {
     clientSocket = socket;
+    clientSocket.setSoTimeout(10000);
     clientIn = clientSocket.getInputStream();
     clientOut = clientSocket.getOutputStream();
     clientReader = new BufferedReader(new InputStreamReader(clientIn));
@@ -24,6 +26,7 @@ public class Communication implements AutoCloseable {
 
   public void setupTarget(Socket socket) throws IOException {
     targetSocket = socket;
+    targetSocket.setSoTimeout(10000);
     targetIn = targetSocket.getInputStream();
     targetOut = targetSocket.getOutputStream();
   }
@@ -36,6 +39,10 @@ public class Communication implements AutoCloseable {
 
   public PrintWriter targetWriter() {
     return new PrintWriter(targetOut);
+  }
+
+  public String client(){
+    return InetAddress.getLoopbackAddress() + ":" + clientSocket.getPort();
   }
 
   @Override

@@ -19,8 +19,8 @@ public class ProxyThread extends Thread {
   @Override
   public void run() {
     try (var communication = new Communication()) {
-      log.info("Client: {}:{}", InetAddress.getLoopbackAddress(), clientSocket.getPort());
       communication.setupClient(clientSocket);
+      log.info("Client: {}", communication.client());
       var connection = initializeConnection(communication);
       HostValidator.validateHost(connection, communication);
       establishConnection(connection, communication);
