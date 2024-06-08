@@ -1,14 +1,15 @@
 package com.github.malahor.forprox;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.malahor.forprox.server.Server;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ class ServerTests {
   private static final int proxyPort = 8989;
   private static final Server server = new Server();
   private static Thread proxyThread;
+  private static HttpClient httpClient;
 
   @BeforeAll
   public static void setUp() throws Exception {
@@ -25,6 +27,12 @@ class ServerTests {
     proxyThread.start();
     // Wait for proxy to start up
     Thread.sleep(5000);
+    initializeHttpClient();
+  }
+
+  public static void initializeHttpClient() {
+    var proxyRoutePlanner = new DefaultProxyRoutePlanner(new HttpHost("localhost", proxyPort));
+    httpClient = HttpClients.custom().setRoutePlanner(proxyRoutePlanner).build();
   }
 
   @AfterAll
@@ -34,45 +42,29 @@ class ServerTests {
 
   @Test
   public void testHttpsRequestThroughProxy() throws Exception {
-    var proxyRoutePlanner = new DefaultProxyRoutePlanner(new HttpHost("localhost", proxyPort));
-    try (var proxiedHttpClient = HttpClients.custom().setRoutePlanner(proxyRoutePlanner).build()) {
-      var httpGet = new HttpGet("https://httpbin.org/ip");
-      var response = proxiedHttpClient.execute(httpGet);
-      var responseBody = EntityUtils.toString(response.getEntity());
-      assertEquals(
-          """
-                  {
-                    "origin": "109.243.1.65"
-                  }
-                  """,
-          responseBody);
+    var httpGet = new HttpGet("https://httpbin.org/ip");
+    try (var response = httpClient.execute(httpGet, httpResponse -> httpResponse)) {
+      assertEquals(HttpStatus.SC_OK, response.getCode());
     }
   }
 
   @Test
   public void testHttpRequestThroughProxy() throws Exception {
-    var proxyRoutePlanner = new DefaultProxyRoutePlanner(new HttpHost("localhost", proxyPort));
-    try (var proxiedHttpClient = HttpClients.custom().setRoutePlanner(proxyRoutePlanner).build()) {
-      var httpGet = new HttpGet("http://httpbin.org/ip");
-      var response = proxiedHttpClient.execute(httpGet);
-      var responseBody = EntityUtils.toString(response.getEntity());
-      assertEquals(
-          """
-                    {
-                      "origin": "109.243.1.65"
-                    }
-                    """,
-          responseBody);
+    var httpGet = new HttpGet("http://httpbin.org/ip");
+    try (var response = httpClient.execute(httpGet, httpResponse -> httpResponse)) {
+      assertEquals(HttpStatus.SC_OK, response.getCode());
     }
   }
 
   @Test
-  public void testBannedRequestThroughProxy() throws Exception {
-    var proxyRoutePlanner = new DefaultProxyRoutePlanner(new HttpHost("localhost", proxyPort));
-    try (var proxiedHttpClient = HttpClients.custom().setRoutePlanner(proxyRoutePlanner).build()) {
-      var httpGet = new HttpGet("https://www.facebook.com");
-      var response = proxiedHttpClient.execute(httpGet);
-      assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatusLine().getStatusCode());
-    }
+  public void testBannedRequestThroughProxy() {
+    Exception exception =
+        assertThrows(
+            ClientProtocolException.class,
+            () -> {
+              var httpGet = new HttpGet("https://www.facebook.com");
+              httpClient.execute(httpGet, httpResponse -> httpResponse);
+            });
+    assertTrue(exception.getMessage().contains("403 Forbidden"));
   }
 }

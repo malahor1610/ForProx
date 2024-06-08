@@ -1,23 +1,33 @@
 package com.github.malahor.forprox;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.malahor.forprox.server.SSLServer;
-import org.apache.http.HttpHost;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.apache.http.util.EntityUtils;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.*;
+import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.ssl.TrustStrategy;
+import org.junit.jupiter.api.*;
 
 class SSLServerTests {
 
   private static final int proxyPort = 9898;
   private static final SSLServer server = new SSLServer();
   private static Thread proxyThread;
+  private static HttpClient httpClient;
 
   @BeforeAll
   public static void setUp() throws Exception {
@@ -25,6 +35,28 @@ class SSLServerTests {
     proxyThread.start();
     // Wait for proxy to start up
     Thread.sleep(5000);
+    initializeHttpClient();
+  }
+
+  public static void initializeHttpClient()
+      throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
+    var sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
+    var sslSocketFactory =
+        new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+    var socketFactoryRegistry =
+        RegistryBuilder.<ConnectionSocketFactory>create()
+            .register("https", sslSocketFactory)
+            .register("http", new PlainConnectionSocketFactory())
+            .build();
+    var connectionManager = new BasicHttpClientConnectionManager(socketFactoryRegistry);
+    var proxy = new HttpHost("https", "localhost", proxyPort);
+    var routePlanner = new DefaultProxyRoutePlanner(proxy);
+    httpClient =
+        HttpClients.custom()
+            .setConnectionManager(connectionManager)
+            .setRoutePlanner(routePlanner)
+            .build();
   }
 
   @AfterAll
@@ -34,66 +66,29 @@ class SSLServerTests {
 
   @Test
   public void testHttpsRequestThroughProxy() throws Exception {
-    var sslContext = TrustCertificates.createTrustAllSslContext();
-    var proxy = new HttpHost("localhost", proxyPort, "https");
-    var routePlanner = new DefaultProxyRoutePlanner(proxy);
-    try (var httpClient =
-        HttpClients.custom()
-            .setRoutePlanner(routePlanner)
-            .setSSLContext(sslContext)
-            .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-            .build()) {
-      var httpGet = new HttpGet("https://httpbin.org/ip");
-      var response = httpClient.execute(httpGet);
-      var responseBody = EntityUtils.toString(response.getEntity());
-      assertEquals(
-          """
-                  {
-                    "origin": "109.243.1.65"
-                  }
-                  """,
-          responseBody);
+    var httpGet = new HttpGet("https://httpbin.org/ip");
+    try (var response = httpClient.execute(httpGet, httpResponse -> httpResponse)) {
+      assertEquals(HttpStatus.SC_OK, response.getCode());
     }
   }
 
   @Test
   public void testHttpRequestThroughProxy() throws Exception {
-    var sslContext = TrustCertificates.createTrustAllSslContext();
-    var proxy = new HttpHost("localhost", proxyPort, "https");
-    var routePlanner = new DefaultProxyRoutePlanner(proxy);
-    try (var httpClient =
-        HttpClients.custom()
-            .setRoutePlanner(routePlanner)
-            .setSSLContext(sslContext)
-            .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-            .build()) {
-      var httpGet = new HttpGet("http://httpbin.org/ip");
-      var response = httpClient.execute(httpGet);
-      var responseBody = EntityUtils.toString(response.getEntity());
-      assertEquals(
-          """
-                      {
-                        "origin": "109.243.1.65"
-                      }
-                      """,
-          responseBody);
+    var httpGet = new HttpGet("http://httpbin.org/ip");
+    try (var response = httpClient.execute(httpGet, httpResponse -> httpResponse)) {
+      assertEquals(HttpStatus.SC_OK, response.getCode());
     }
   }
 
   @Test
-  public void testBannedRequestThroughProxy() throws Exception {
-    var sslContext = TrustCertificates.createTrustAllSslContext();
-    var proxy = new HttpHost("localhost", proxyPort, "https");
-    var routePlanner = new DefaultProxyRoutePlanner(proxy);
-    try (var httpClient =
-        HttpClients.custom()
-            .setRoutePlanner(routePlanner)
-            .setSSLContext(sslContext)
-            .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-            .build()) {
-      var httpGet = new HttpGet("https://www.facebook.com");
-      var response = httpClient.execute(httpGet);
-      assertEquals(403, response.getStatusLine().getStatusCode());
-    }
+  public void testBannedRequestThroughProxy() {
+    Exception exception =
+        assertThrows(
+            ClientProtocolException.class,
+            () -> {
+              var httpGet = new HttpGet("https://www.facebook.com");
+              httpClient.execute(httpGet, httpResponse -> httpResponse);
+            });
+    assertTrue(exception.getMessage().contains("403 Forbidden"));
   }
 }
