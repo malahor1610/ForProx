@@ -1,19 +1,15 @@
 package com.github.malahor.forprox.server;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import javax.net.ssl.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
 @Slf4j
-@Component
 public class SSLServer {
   private static final int PORT = 9898;
-  private static final String KEY_STORE = "classpath:proxykeystore.jks";
+  private static final String KEY_STORE = "proxykeystore.jks";
 
   public void start() {
     try {
@@ -53,7 +49,8 @@ public class SSLServer {
   private KeyStore loadKeystore()
       throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
     var keyStore = KeyStore.getInstance("JKS");
-    try (var keyStoreStream = new FileInputStream(ResourceUtils.getFile(KEY_STORE))) {
+    var classloader = Thread.currentThread().getContextClassLoader();
+    try (var keyStoreStream = classloader.getResourceAsStream(KEY_STORE)) {
       keyStore.load(keyStoreStream, "changeit".toCharArray());
     }
     return keyStore;

@@ -1,17 +1,16 @@
 package com.github.malahor.forprox.validation;
 
-import com.github.malahor.forprox.server.Communication;
 import com.github.malahor.forprox.connection.Connection;
+import com.github.malahor.forprox.server.Communication;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.stream.Stream;
+import java.io.InputStreamReader;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.ResourceUtils;
 
 @Slf4j
 public class HostValidator {
 
-  private static final String BANNED_HOSTS_LIST = "classpath:banned.txt";
+  private static final String BANNED_HOSTS_LIST = "banned.txt";
 
   public static void validateHost(Connection connection, Communication communication)
       throws ForbiddenException, IOException {
@@ -25,10 +24,12 @@ public class HostValidator {
   }
 
   private static boolean isBanned(String host) {
-    try (Stream<String> stream = Files.lines(ResourceUtils.getFile(BANNED_HOSTS_LIST).toPath())) {
+    var classloader = Thread.currentThread().getContextClassLoader();
+    try (var stream =
+        new BufferedReader(
+                new InputStreamReader(classloader.getResourceAsStream(BANNED_HOSTS_LIST)))
+            .lines()) {
       return stream.anyMatch(line -> line.equals(host));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
     }
   }
 
