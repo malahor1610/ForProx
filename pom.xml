@@ -8,8 +8,8 @@
 	<name>ForProx</name>
 	<description>My own forward proxy server</description>
 	<properties>
-		<maven.compiler.target>1.17</maven.compiler.target>
-		<maven.compiler.source>1.17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.source>17</maven.compiler.source>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -35,5 +35,16 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.3.0</version>
+				<configuration>
+					<mainClass>com.github.malahor.forprox.server.Server</mainClass>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
