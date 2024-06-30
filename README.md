@@ -13,7 +13,7 @@ Verification of proxy server is done on the unit tests level where HTTP client i
 
 ## Requirements
 
-- Java (JDK 17+)
+- Java (JDK 21)
 - Git
 
 ## Usage
