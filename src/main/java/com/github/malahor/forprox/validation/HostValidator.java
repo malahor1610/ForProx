@@ -20,7 +20,6 @@ public class HostValidator {
       forbidConnection(communication);
       throw new ForbiddenException(host);
     }
-    // TODO: check host in scope of banned/warned/whatever sites
   }
 
   private static boolean isBanned(String host) {
